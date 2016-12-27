@@ -111,6 +111,8 @@ bool Board::passTurn() {
                                       "/game/" + match_id_ + "/pass_turn",
                                       call);
             SDL_Log("pass turn: %s", x.c_str());
+
+            updateWinner();
         });
         t.detach();
         return true;
@@ -171,7 +173,7 @@ bool Board::onTurn() {
 }
 
 int Board::outgoingRequests() {
-    return net_.outgoingRequests();
+    return net_.getOutgoingRequests();
 }
 
 int Board::size() {

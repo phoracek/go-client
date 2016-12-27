@@ -1,15 +1,19 @@
 #include "networking.h"
 
+#include <SDL_log.h>
+
 extern "C" {
 #include <curl/curl.h>
 }
 
-size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-    ((std::string *) userp)->append((char *) contents, size * nmemb);
-    return size * nmemb;
+
+size_t write_callback(void *contents, size_t size, size_t number,
+                      void *user_data) {
+    ((std::string *) user_data)->append((char *) contents, size * number);
+    return size * number;
 }
 
-Networking::Networking(std::string api_address)
+Networking::Networking(const std::string &api_address)
         : api_address_(api_address),
           outgoing_requests_(0) {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -17,11 +21,9 @@ Networking::Networking(std::string api_address)
 
 Networking::~Networking() {}
 
-
-#include <iostream>
-
 std::string
-Networking::send(std::string method, std::string path, std::string data) {
+Networking::send(const std::string &method, const std::string &path,
+                 const std::string &data) {
     outgoing_requests_ += 1;
     CURL *curl;
     CURLcode res;
@@ -59,7 +61,7 @@ Networking::send(std::string method, std::string path, std::string data) {
 
         // error check
         if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            SDL_Log("curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
 
         // cleanup
@@ -71,14 +73,6 @@ Networking::send(std::string method, std::string path, std::string data) {
     return answer;
 }
 
-std::string
-Networking::sendThreaded(std::string method, std::string path,
-                         std::string data) {
-    // auto answer = std::async(send, method, path, data);
-
-    return ""; // answer.get();
-}
-
-int Networking::outgoingRequests() {
+int Networking::getOutgoingRequests() const {
     return outgoing_requests_;
 }

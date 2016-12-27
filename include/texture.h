@@ -1,7 +1,9 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
+
 #include <GL/glew.h>
+
 
 class Texture {
 public:
@@ -13,5 +15,6 @@ public:
 private:
     GLuint id_;
 };
+
 
 #endif // TEXTURE_H_

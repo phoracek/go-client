@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 
+// load model from string
 bool loadModel(std::string path, std::vector<glm::vec3> &out_vertices,
                std::vector<glm::vec2> &out_uvs,
                std::vector<glm::vec3> &out_normals) {
@@ -101,8 +102,6 @@ VAO::VAO(std::string path) {
 }
 
 VAO::~VAO() {
-    std::cout << "delted " << id_ << std::endl;
-
     glDeleteVertexArrays(1, &id_);
 }
 

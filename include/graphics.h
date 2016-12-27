@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H_
 #define GRAPHICS_H_
 
+
 #include <vector>
 #include <string>
 #include <map>
@@ -19,6 +20,7 @@
 #include "texture.h"
 #include "camera.h"
 
+
 class Graphics {
 public:
     Graphics(unsigned int width, unsigned int height);
@@ -31,7 +33,7 @@ public:
     std::shared_ptr<Renderable> createRenderableLight(std::string object_path,
                                                  std::string texture_path);
 
-    Camera *getCamera();
+    Camera *getCamera() const;
 
 private:
     SDL_Window *window_;
@@ -47,8 +49,9 @@ private:
     std::vector<std::weak_ptr<Renderable>> renderables_light_;
     std::map<std::string, std::weak_ptr<VAO>> object_list_;
     std::map<std::string, std::weak_ptr<Texture>> texture_list_;
-	
+
 	std::mutex rendering_;
 };
+
 
 #endif // GRAPHICS_H_

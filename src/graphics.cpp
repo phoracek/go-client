@@ -3,7 +3,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Graphics::Graphics(unsigned int width, unsigned int height) {
-    printf("sdl init\n");
     SDL_Init(SDL_INIT_VIDEO);
 
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -17,16 +16,15 @@ Graphics::Graphics(unsigned int width, unsigned int height) {
 
     context_ = SDL_GL_CreateContext(window_);
 
-    printf("glew init\n");
     glewExperimental = GL_TRUE;
     GLenum error = glGetError();
-    if (error != GL_NO_ERROR)
-    {
-        SDL_Log("opengl error");
+    if (error != GL_NO_ERROR) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "opengl error");
+        // SDL_Log();
     }
     GLenum glewinit = glewInit();
     if (glewinit != GLEW_OK) {
-        SDL_Log("glew init error");
+        SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "glew init error");
         exit(-1);
     }
 
@@ -34,15 +32,14 @@ Graphics::Graphics(unsigned int width, unsigned int height) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_CULL_FACE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
 
-    printf("shader program init\n");
     shader_program_ = new ShaderProgram("../data/vertex_shadow.glsl",
                                         "../data/fragment_shadow.glsl");
     shader_program_light_ = new ShaderProgram("../data/vertex_light.glsl",
-                                        "../data/fragment_light.glsl");
+                                              "../data/fragment_light.glsl");
 
     camera_ = new Camera;
     projection_ = glm::perspective(20.f, (GLfloat) width / (GLfloat) height,
@@ -59,10 +56,10 @@ Graphics::~Graphics() {
 
 void Graphics::render() {
     // TODO better place for mutex?
-	// std::lock_guard<std::mutex> guard(rendering_);
-	
-	rendering_.lock();
-	
+    // std::lock_guard<std::mutex> guard(rendering_);
+
+    rendering_.lock();
+
     // cleanup
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -121,18 +118,18 @@ void Graphics::render() {
     glUseProgram(0);
 
     SDL_GL_SwapWindow(window_);
-	
-	rendering_.unlock();
+
+    rendering_.unlock();
 }
 
 
 std::shared_ptr<Renderable> Graphics::createRenderable(std::string object_path,
                                                        std::string texture_path) {
     // TODO better place for mutex?
-	// std::lock_guard<std::mutex> guard(rendering_);
-	rendering_.lock();
-	
-	
+    // std::lock_guard<std::mutex> guard(rendering_);
+    rendering_.lock();
+
+
     //TODO queue??????????????????
     // shader_program_->use(); //TODO ???
 
@@ -157,21 +154,20 @@ std::shared_ptr<Renderable> Graphics::createRenderable(std::string object_path,
                            texture_list_[texture_path].lock()));
     renderables_.push_back(temp);
 
-	rendering_.unlock();
-	
+    rendering_.unlock();
+
     return temp;
 }
 
 // TODO do jedne funkce
-std::shared_ptr<Renderable> Graphics::createRenderableLight(std::string object_path,
-                                                       std::string texture_path) {
+std::shared_ptr<Renderable>
+Graphics::createRenderableLight(std::string object_path,
+                                std::string texture_path) {
     // TODO better place for mutex?
-	// std::lock_guard<std::mutex> guard(rendering_);
-	rendering_.lock();
-														   
-														   
-    
-	//TODO queue??????????????????
+    // std::lock_guard<std::mutex> guard(rendering_);
+    rendering_.lock();
+
+    //TODO queue??????????????????
     shader_program_light_->use(); //TODO ???
 
     // vao creation
@@ -195,11 +191,11 @@ std::shared_ptr<Renderable> Graphics::createRenderableLight(std::string object_p
                            texture_list_[texture_path].lock()));
     renderables_light_.push_back(temp);
 
-	rendering_.unlock();
-	
+    rendering_.unlock();
+
     return temp;
 }
 
-Camera *Graphics::getCamera() {
+Camera *Graphics::getCamera() const {
     return camera_;
 }

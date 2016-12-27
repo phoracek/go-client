@@ -1,7 +1,9 @@
 #ifndef SHADER_PROGRAM_
 #define SHADER_PROGRAM_
 
+
 #include <GL/glew.h>
+
 
 class ShaderProgram {
 public:
@@ -16,5 +18,6 @@ public:
 private:
     GLuint id_;
 };
+
 
 #endif // SHADER_PROGRAM_

@@ -1,9 +1,11 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
+
 
 class Camera {
 public:
@@ -29,9 +31,9 @@ private:
     glm::vec3 up_;
     glm::vec3 right_;
 
-
     GLfloat pitch_;
     GLfloat yaw_;
 };
+
 
 #endif // CAMERA_H_

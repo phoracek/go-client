@@ -1,11 +1,13 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+
 #include "graphics.h"
 #include "board.h"
 
 #include <sstream>
 #include <mutex>
+
 
 class Game {
 public:
@@ -24,7 +26,10 @@ private:
     std::mutex rendering_;
 
 	void updateBoard();
-    std::vector<std::shared_ptr<Renderable>> bb;
+	std::vector<std::shared_ptr<Renderable>> bb_;
+
+    void updateCursor();
+	std::shared_ptr<Renderable> cursor_;
 
 
 	void newMatch();
@@ -41,5 +46,6 @@ private:
     Board *board_;
     SDL_Event event_;
 };
+
 
 #endif // GAME_H_

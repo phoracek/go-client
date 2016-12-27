@@ -1,6 +1,7 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+
 #include "networking.h"
 #include "camera.h"
 
@@ -12,6 +13,7 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
+
 
 class Board {
 public:
@@ -57,5 +59,6 @@ private:
 
     Networking net_;
 };
+
 
 #endif // BOARD_H_

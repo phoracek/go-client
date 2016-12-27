@@ -1,8 +1,10 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+
 #include <string>
 #include <map>
+
 
 class Config {
 public:
@@ -14,5 +16,6 @@ public:
 private:
     std::map<std::string, std::string> values_;
 };
+
 
 #endif // CONFIG_H_
