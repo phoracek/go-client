@@ -5,16 +5,18 @@ std::string data_folder = "../data/";
 Game::Game() : phase_(INTRO) {
     SDL_Init(SDL_INIT_EVERYTHING);
 
+    // logging
     SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
-    std::thread t([&]() {
-        board_ = new Board();
-    });
+    // board
+    std::thread t([&]() { board_ = new Board(); });
 
+    // graphics
     graphics_ = new Graphics(640, 480);
     graphics_->getCamera()->setPosition(glm::vec3(-2.5f, 5.0f, 4.0f));
     graphics_->getCamera()->setRotation(-33.f, 0.f);
 
+    // mouse
     SDL_SetRelativeMouseMode(SDL_TRUE);
     cursor_ = graphics_->createRenderable(data_folder + "flat_hor.obj",
                                           data_folder + "hand.png");
@@ -22,6 +24,7 @@ Game::Game() : phase_(INTRO) {
 
     t.join();
 
+    // game loops
     introLoop();
     mainLoop();
     finalLoop();
@@ -53,8 +56,6 @@ void Game::introLoop() {
             graphics_->createRenderable(data_folder + "table_empty.obj",
                                         data_folder + "table_empty.png"));
 
-    graphics_->getCamera()->setRotation(-33.f, 0.f);
-
     last_time_ = SDL_GetTicks();
 
     while (phase_ == INTRO) {
@@ -64,7 +65,7 @@ void Game::introLoop() {
         // INPUT
         while (SDL_PollEvent(&event_)) {
             if (event_.type == SDL_KEYDOWN) {
-				if (event_.key.keysym.sym == SDLK_e) { // console join
+                if (event_.key.keysym.sym == SDLK_e) { // console join
                     std::string input_id;
                     std::cout << "Enter match_id: ";
                     std::cin >> input_id;
@@ -85,20 +86,21 @@ void Game::introLoop() {
                     glm::vec2 tar = pointingAt(-1.5f, 1.f, 0.f);
                     int i = int(tar.x + 0.5f);
                     int j = int(tar.y + 0.5f);
-					
-					
+
+
                     if (i >= 0.f and i < 9.0f and
                         j >= 0.f and j < 4.5f) { // left side -> create match
-						board_->createMatch();
-						SDL_SetClipboardText(board_->getMatchID().c_str());
-						SDL_Log("match created\nmatch id: %s", board_->getMatchID().c_str());
+                        board_->createMatch();
+                        SDL_SetClipboardText(board_->getMatchID().c_str());
+                        SDL_Log("match created\nmatch id: %s",
+                                board_->getMatchID().c_str());
                         phase_ = MAIN;
                     } else if (i >= 0.f and i < 9.0f and
                                j >= 4.5f and
                                j < 9.f) { // right side -> join match
-						std::string clipboard(SDL_GetClipboardText());
-						board_->joinMatch(clipboard);
-						SDL_Log("match joined");
+                        std::string clipboard(SDL_GetClipboardText());
+                        board_->joinMatch(clipboard);
+                        SDL_Log("match joined");
                         phase_ = MAIN;
                     }
                 }
@@ -146,11 +148,11 @@ void Game::mainLoop() {
     unsigned int size = board_->size();
     for (unsigned int i = 0; i < size; i++) {
         for (unsigned int j = 0; j < size; j++) {
-            bb_.push_back(
+            board_renderables_.push_back(
                     graphics_->createRenderable(
                             data_folder + "stone.obj",
                             data_folder + "texture.png"));
-            bb_[i * size + j].get()->setPosition(
+            board_renderables_[i * size + j].get()->setPosition(
                     glm::vec3(1.f * i, 0.f, 1.f * j));
         }
     }
@@ -186,12 +188,13 @@ void Game::mainLoop() {
                         int j = int(tar.y + 0.5f);
                         if (i >= 0 and i < board_->size() and
                             j >= 0 and j < board_->size()) {
-                            bb_[i * board_->size() + j]
-                                    = graphics_->createRenderable(data_folder +
-                                                                  "stone.obj",
-                                                                  data_folder +
-                                                                  "putting.png");
-                            bb_[i * board_->size() + j].get()->setPosition(
+                            int x = i * board_->size() + j;
+                            board_renderables_[x] = graphics_->createRenderable(
+                                    data_folder +
+                                    "stone.obj",
+                                    data_folder +
+                                    "putting.png");
+                            board_renderables_[x].get()->setPosition(
                                     glm::vec3(1.f * i, 0.f, 1.f * j));
                         }
                         board_->putStone(i, j);
@@ -200,7 +203,7 @@ void Game::mainLoop() {
             }
         }
 
-		// CURSOR UPDATE
+        // CURSOR UPDATE
         if (match_ready && board_->onTurn()) {
             glm::vec2 p = pointingAt(0.21f, 1.f, 0.f);
 
@@ -217,15 +220,14 @@ void Game::mainLoop() {
                     glm::vec3(0.f, -1.f, 0.f));
         }
 
-        // FPS
+        // RENDER
         render();
         last_time_ = current_time_;
-
 
         // BOARD UPDATE
         const int board_update_freq = 1500;
         if (current_time_ - last_time_board > board_update_freq) {
-            if (!board_->onTurn()) { // TODO + board_->getOutgoingRequests() == 0 ?
+            if (!board_->onTurn()) {
                 std::thread t([&]() {
                     board_->updateOnTurn();
                     if (board_->should_i_update()) {
@@ -233,7 +235,6 @@ void Game::mainLoop() {
                         board_->updateWinner();
                         if (board_->getWinner() != '0') {
                             SDL_Log("WINNER == %c", board_->getWinner());
-                            //TODO poradne
                             phase_ = FINAL;
                         }
 
@@ -248,7 +249,7 @@ void Game::mainLoop() {
         }
     }
 
-    bb_.clear();
+    board_renderables_.clear();
 }
 
 
@@ -259,6 +260,8 @@ void Game::finalLoop() {
 
     board_->updateWinner();
 
+
+    // CREATE RENDERABLES
     std::vector<std::shared_ptr<Renderable>> temp_renderables;
     temp_renderables.push_back(
             graphics_->createRenderable(data_folder + "table_empty.obj",
@@ -285,7 +288,10 @@ void Game::finalLoop() {
 
         // INPUT
         while (SDL_PollEvent(&event_)) {
-            if (event_.type == SDL_KEYDOWN) {
+            if (event_.type == SDL_MOUSEBUTTONDOWN) { // action
+                if (event_.button.button == SDL_BUTTON_LEFT) {
+                    phase_ = BREAK;
+                }
             } else if (event_.type == SDL_QUIT) {
                 phase_ = BREAK;
             } else if (event_.type == SDL_MOUSEMOTION) {
@@ -298,8 +304,8 @@ void Game::finalLoop() {
         // RENDER
         render();
         last_time_ = current_time_;
-
     }
+
 }
 
 
@@ -346,23 +352,23 @@ void Game::updateBoard() {
         for (unsigned int i = 0; i < size; i++) {
             for (unsigned int j = 0; j < size; j++) {
                 if (board[i][j] == '1') {
-                    bb_[i * size + j] =
+                    board_renderables_[i * size + j] =
                             graphics_->createRenderable(
                                     data_folder + "stone.obj",
                                     data_folder + "black.png");
                 } else if (board[i][j] == '2') {
-                    bb_[i * size + j] =
+                    board_renderables_[i * size + j] =
                             graphics_->createRenderable(
                                     data_folder + "stone.obj",
                                     data_folder + "red.png");
                 } else {
-                    bb_[i * size + j] =
+                    board_renderables_[i * size + j] =
                             graphics_->createRenderable(
                                     data_folder + "stone.obj",
                                     data_folder + "texture.png");
                 }
 
-                bb_[i * size + j].get()->setPosition(
+                board_renderables_[i * size + j].get()->setPosition(
                         glm::vec3(1.f * i,
                                   0.f,
                                   1.f * j));

@@ -26,7 +26,7 @@ private:
     std::mutex rendering_;
 
 	void updateBoard();
-	std::vector<std::shared_ptr<Renderable>> bb_;
+	std::vector<std::shared_ptr<Renderable>> board_renderables_;
 
     void updateCursor();
 	std::shared_ptr<Renderable> cursor_;
