@@ -64,13 +64,7 @@ void Game::introLoop() {
         // INPUT
         while (SDL_PollEvent(&event_)) {
             if (event_.type == SDL_KEYDOWN) {
-                if (event_.key.keysym.sym == SDLK_q) { // new match
-                    newMatch();
-                    phase_ = MAIN;
-                } else if (event_.key.keysym.sym == SDLK_w) { // join match
-                    joinMatch();
-                    phase_ = MAIN;
-                } else if (event_.key.keysym.sym == SDLK_e) { // console join
+				if (event_.key.keysym.sym == SDLK_e) { // console join
                     std::string input_id;
                     std::cout << "Enter match_id: ";
                     std::cin >> input_id;
@@ -91,15 +85,20 @@ void Game::introLoop() {
                     glm::vec2 tar = pointingAt(-1.5f, 1.f, 0.f);
                     int i = int(tar.x + 0.5f);
                     int j = int(tar.y + 0.5f);
-
+					
+					
                     if (i >= 0.f and i < 9.0f and
                         j >= 0.f and j < 4.5f) { // left side -> create match
-                        newMatch();
+						board_->createMatch();
+						SDL_SetClipboardText(board_->getMatchID().c_str());
+						SDL_Log("match created\nmatch id: %s", board_->getMatchID().c_str());
                         phase_ = MAIN;
                     } else if (i >= 0.f and i < 9.0f and
                                j >= 4.5f and
                                j < 9.f) { // right side -> join match
-                        joinMatch();
+						std::string clipboard(SDL_GetClipboardText());
+						board_->joinMatch(clipboard);
+						SDL_Log("match joined");
                         phase_ = MAIN;
                     }
                 }
@@ -315,18 +314,6 @@ glm::vec2 Game::pointingAt(float height, float size, float offset) {
     return glm::vec2(i, j);
 }
 
-
-void Game::newMatch() {
-    board_->createMatch();
-    SDL_SetClipboardText(board_->getMatchID().c_str());
-    SDL_Log("match created\nmatch id: %s", board_->getMatchID().c_str());
-}
-
-void Game::joinMatch() {
-    std::string clipboard(SDL_GetClipboardText());
-    board_->joinMatch(clipboard);
-    SDL_Log("match joined");
-}
 
 void Game::updateCursor() {
     glm::vec2 p = pointingAt(-1.f, 1.f, 0.f);

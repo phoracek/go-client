@@ -32,9 +32,6 @@ private:
 	std::shared_ptr<Renderable> cursor_;
 
 
-	void newMatch();
-    void joinMatch();
-
     enum Phase {
         INTRO,
         MAIN,
