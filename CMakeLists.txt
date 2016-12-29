@@ -4,6 +4,8 @@ project(cppgo)
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -static-libstdc++ -static-libgcc -Wl,--no-as-needed -pthread   -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pthread")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
